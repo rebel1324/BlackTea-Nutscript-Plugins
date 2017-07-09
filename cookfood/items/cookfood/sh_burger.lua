@@ -1,7 +1,7 @@
-ITEM.name = "치즈 버거"
+ITEM.name = "Cheese Burger"
 ITEM.model = "models/food/burger.mdl"
 ITEM.hungerAmount = 150
-ITEM.foodDesc = "라지 사이즈의 치즈 버거입니다."
+ITEM.foodDesc = "burgerDesc"
 ITEM.quantity = 1
 ITEM.price = 100
 ITEM.iconCam = {

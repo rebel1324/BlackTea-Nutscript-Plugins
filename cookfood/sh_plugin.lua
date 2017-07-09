@@ -5,11 +5,11 @@ PLUGIN.desc = "How about getting new foods in NutScript?"
 PLUGIN.hungrySeconds = 1100 -- A player can stand up 300 seconds without any foods
 
 COOKLEVEL = {
-	[1] = {"Uncooked", 2, color_white},
-	[2] = {"Rarely Cooked", 1, Color(207, 0, 15)},
-	[3] = {"Kinda Cooked", 3, Color(235, 149, 50)},
-	[4] = {"Well Cooked", 4, Color(103, 128, 159)},
-	[5] = {"Fantastic", 6, Color(63, 195, 128)},
+	[1] = {"cookNever", 2, color_white},
+	[2] = {"cookFailed", 1, Color(207, 0, 15)},
+	[3] = {"cookWell", 3, Color(235, 149, 50)},
+	[4] = {"cookDone", 4, Color(103, 128, 159)},
+	[5] = {"cookGood", 6, Color(63, 195, 128)},
 }
 COOKER_MICROWAVE = 1
 COOKER_STOVE = 2
@@ -53,6 +53,7 @@ if (CLIENT) then
 
 	local hungerBar, percent, wave
 	function PLUGIN:Think()
+		-- This schema does not requires the bar.
 		/*hungerBar = hungerBar or nut.bar.get("hunger")
 		percent = (1 - LocalPlayer():getHungerPercent())
 
@@ -186,17 +187,15 @@ else
 	end
 
 	local thinkTime = CurTime()
-	function PLUGIN:Think()
+	function PLUGIN:PlayerPostThink(client)
 		if (thinkTime < CurTime()) then
-			for k, v in ipairs(player.GetAll()) do
-				local percent = (1 - v:getHungerPercent())
+			local percent = (1 - client:getHungerPercent())
 
-				if (percent <= 0) then
-					if (v:Alive() and v:Health() <= 0) then
-						v:Kill()
-					else
-						v:SetHealth(math.Clamp(v:Health() - 1, 0, v:GetMaxHealth()))
-					end
+			if (percent <= 0) then
+				if (client:Alive() and client:Health() <= 0) then
+					client:Kill()
+				else
+					client:SetHealth(math.Clamp(client:Health() - 1, 0, client:GetMaxHealth()))
 				end
 			end
 
