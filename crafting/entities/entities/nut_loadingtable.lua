@@ -12,7 +12,7 @@ nut.item.registerInv(ENT.invType, 5, 4)
 
 if (SERVER) then
 	function ENT:Initialize()
-		self:SetModel("models/rebel1324/crafting_table.mdl")
+		self:SetModel("models/rebel1324/reload_table.mdl")
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetMoveType(MOVETYPE_VPHYSICS)
 		self:setNetVar("active", false)
@@ -258,7 +258,7 @@ else
 		local position = (self:LocalToWorld(self:OBBCenter()) + self:GetUp()*16):ToScreen()
 		local x, y = position.x, position.y
 
-		nut.util.drawText(L"craftingTableName", x, y, ColorAlpha(nut.config.get("color"), alpha), 1, 1, nil, alpha * 0.65)
-		nut.util.drawText(L"craftingTableDesc", x, y + 16, ColorAlpha(color_white, alpha), 1, 1, "nutSmallFont", alpha * 0.65)
+		nut.util.drawText(L"loadingTableName", x, y, ColorAlpha(nut.config.get("color"), alpha), 1, 1, nil, alpha * 0.65)
+		nut.util.drawText(L"loadingTableDesc", x, y + 16, ColorAlpha(color_white, alpha), 1, 1, "nutSmallFont", alpha * 0.65)
 	end
 end
