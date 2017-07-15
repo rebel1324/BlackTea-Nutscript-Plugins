@@ -11,7 +11,7 @@ ITEM.mustCooked = false
 ITEM.quantity = 1
 
 function ITEM:getDesc()
-	local str = L(self.foodDesc)
+	local str = L(self.foodDesc or "ERROR")
 
 	if (!IsValid(self.entity)) then
 		if (self.mustCooked != false) then
