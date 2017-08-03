@@ -7,6 +7,19 @@ PLUGIN.toxicAreas = PLUGIN.toxicAreas or {}
 DEFAULT_GASMASK_HEALTH = 100
 DEFAULT_GASMASK_FILTER = 600
 
+if (SERVER) then
+	resource.AddFile("sound/gasmaskon.wav")
+	resource.AddFile("sound/gasmaskoff.wav")
+	resource.AddFile("sound/gmsk_in.wav")
+	resource.AddFile("sound/gmsk_out.wav")
+	resource.AddFile("materials/gasmask_fnl.vmt")
+	resource.AddFile("materials/gasmask3.vtf")
+	resource.AddFile("materials/gasmask3_n.vtf")
+	resource.AddFile("materials/shtr_01.vmt")
+	resource.AddFile("materials/shtr.vtf")
+	resource.AddFile("materials/shtr_n.vtf")
+end
+
 local langkey = "english"
 do
 	local langTable = {
