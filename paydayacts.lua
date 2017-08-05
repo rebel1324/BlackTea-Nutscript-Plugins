@@ -84,7 +84,6 @@ local function drawRingCunt(x, y, w, h, perc, color, cirMat)
 		render.SetStencilCompareFunction(STENCILCOMPARISONFUNCTION_ALWAYS)
 		render.SetBlend(0) --don't visually draw, just stencil
 		
-		-- why
 		surface.SetDrawColor( 0, 0, 0, 1 )
 		draw.NoTexture()
 		DrawPercRect(x, y, w, h, perc, true)

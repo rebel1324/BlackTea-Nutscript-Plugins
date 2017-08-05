@@ -2,10 +2,30 @@ PLUGIN.name = "Macro Weapon Register"
 PLUGIN.author = "Black Tea"
 PLUGIN.desc = "Gun Jesus have arrived."
 
+if (!CustomizableWeaponry) then return end
+/*
+	MODIFICATION TUTORIAL
+		- sh_config
+		 This file contains ammo structure.
+		- sh_languages
+		 This file contains language sets for the weapons.
+		- cl_cw3d2d
+		 This file contains modification for CW 2.0 HUDs
+		- sh_attachments
+		 This file contains information and of attachment items.
+
+
+		
+
+
+
+
+*/
 
 nut.util.include("sh_configs.lua")
 nut.util.include("sh_languages.lua")
 nut.util.include("cl_cw3d2d.lua")
+nut.util.include("sh_attachments.lua")
 
 function PLUGIN:InitializedPlugins()
 	table.Merge(nut.lang.stored["korean"], self.koreanTranslation)
@@ -57,7 +77,7 @@ function PLUGIN:InitializedPlugins()
 				v.isGoodWeapon = true
 				v.canPenetrate = function() return false end
 				v.canRicochet = function() return false end
-				v.MuzzleEffect = "muzzleflash_ak74"
+				--v.MuzzleEffect = "muzzleflash_ak74" -- lol jk
 				v.Primary.DefaultClip = 0
 
 				if (self.changeAmmo[v.Primary.Ammo]) then
@@ -86,7 +106,19 @@ function PLUGIN:InitializedPlugins()
 					v.AddSpreadSpeed = v.SpreadPerShot*5
 				end
 
+				-- lol fuck you 
+				function v:detachSpecificAttachment(attachmentName)
+					-- since we don't know the category, we'll just have to iterate over all attachments, find the one we want, and attach it there
+					for category, data in pairs(self.Attachments) do
+						for key, attachment in ipairs(data.atts) do
+							if attachment == attachmentName then
+								self:detach(category, key - 1, false)
+							end
+						end
+					end
+				end
 
+				-- A code to get rid of fucking movement/sway disability.
 				function v:getFinalSpread(vel, maxMultiplier)
 					maxMultiplier = maxMultiplier or 1
 					
@@ -175,9 +207,11 @@ function PLUGIN:InitializedPlugins()
 				local ITEM = nut.item.register(class:lower(), "base_weapons", nil, nil, true)
 				ITEM.name = uniqueID
 				ITEM.price = dat.price or 4000
+				ITEM.exRender = dat.exRender or false
 				ITEM.iconCam = self.modelCam[v.WorldModel:lower()]
 				ITEM.class = prefix .. uniqueID
 				ITEM.holsterDrawInfo = dat.holster
+				ITEM.isCW = true
 
 				if (dat.holster) then
 					ITEM.holsterDrawInfo.model = v.WorldModel
@@ -186,8 +220,8 @@ function PLUGIN:InitializedPlugins()
 				ITEM.model = v.WorldModel
 
 				local slot = self.slotCategory[v.Slot]
-				ITEM.width = 1
-				ITEM.height = 1
+				ITEM.width = dat.width or 1
+				ITEM.height = dat.height or 1
 				ITEM.weaponCategory = slot or "primary"
 
 				function ITEM:onEquipWeapon(client, weapon)
@@ -203,7 +237,7 @@ function PLUGIN:InitializedPlugins()
 						x = x - 8*1.6
 					end
 
-					if (item:getData("mod")) then
+					if (table.Count(item:getData("mod", {})) > 0) then
 						surface.SetDrawColor(255, 255, 110, 100)
 						surface.DrawRect(x, y, 8, 8)
 					end
@@ -213,12 +247,12 @@ function PLUGIN:InitializedPlugins()
 					if (!self.entity or !IsValid(self.entity)) then
 						local text = L("gunInfoDesc", L(v.Primary.Ammo)) .. "\n"
 
-						text = text .. L("gunInfoStat", v.Damage, self.weaponCategory, v.Primary.ClipSize) .. "\n"
+						text = text .. L("gunInfoStat", v.Damage, L(self.weaponCategory), v.Primary.ClipSize) .. "\n"
 
 						local attText = ""
 						local mods = self:getData("mod", {})
 						for _, att1 in pairs(mods) do
-							attText = attText .. "\n<color=39, 174, 96>" .. L(att1) .. "</color>"
+							attText = attText .. "\n<color=39, 174, 96>" .. L(att1[1] or "ERROR") .. "</color>"
 						end
 
 						text = text .. L("gunInfoAttachments", attText)
@@ -229,9 +263,78 @@ function PLUGIN:InitializedPlugins()
 						return text
 					end
 				end
+				
+			ITEM.functions.use = {
+			name = "Detach",
+			tip = "useTip",
+			icon = "icon16/wrench.png",
+            isMulti = true,
+            multiOptions = function(item, client)
+                local targets = {}
+
+                for k, v in pairs(item:getData("mod", {})) do
+                    table.insert(targets, {
+                        name = L(v[1] or "ERROR"),
+                        data = k,
+                    })
+                end
+
+                return targets
+            end,
+			onCanRun = function(item)
+				if (table.Count(item:getData("mod", {})) <= 0) then
+					return false
+				end
+				
+				return (!IsValid(item.entity))
+			end,
+			onRun = function(item, data)
+						local client = item.player
+						if (data) then
+							local char = client:getChar()
+
+							if (char) then
+								local inv = char:getInv()
+
+								if (inv) then
+									local mods = item:getData("mod", {})
+									local attData = mods[data]
+
+									if (attData) then
+										inv:add(attData[1])
+
+										
+										local wepon = client:GetActiveWeapon()
+										if (IsValid(wepon) and wepon:GetClass() == item.class) then
+											wepon:detachSpecificAttachment(attData[2])
+										end
+
+										mods[data] = nil
+
+										if (table.Count(mods) == 0) then
+											item:setData("mod", nil)
+										else
+											item:setData("mod", mods)
+										end
+										
+										-- Yeah let them know you did something with your dildo
+										client:EmitSound("cw/holster4.wav")
+									else
+										client:notifyLocalized("notAttachment")
+									end
+								end
+							end
+						else
+							client:notifyLocalized("detTarget")
+						end
+
+						return false
+					end,
+			}
 
 				HOLSTER_DRAWINFO[ITEM.class] = ITEM.holsterDrawInfo
 
+				-- Register Language name for the gun.
 				if (CLIENT) then
 					if (nut.lang.stored["english"] and nut.lang.stored["korean"]) then
 						ITEM.name = v.PrintName 
@@ -242,129 +345,11 @@ function PLUGIN:InitializedPlugins()
 				end
 			end
 		end
-
-		-- attachments
-		for k, v in pairs(CustomizableWeaponry.registeredAttachments) do
-			local className = v.name
-			local printName = v.displayName
-
-			if (className:lower():find("am_")) then
-				continue
-			end
-
-			local requiresWorkbench = false
-
-			if (className:lower():find("bg_")) then
-				requiresWorkbench = true
-			end
-
-			local ITEM = nut.item.register(className, nil, nil, nil, true)
-			ITEM.name = className
-			ITEM.desc = "attachment" .. (requiresWorkbench and "2" or "")
-			ITEM.price = 300
-			ITEM.model = "models/Items/BoxSRounds.mdl"
-			ITEM.width = 1
-			ITEM.height = 1
-			ITEM.isAttachment = true
-			ITEM.category = "Attachments"
-
-			if (CLIENT) then
-				if (nut.lang.stored["english"] and nut.lang.stored["korean"]) then
-					ITEM.name = className
-
-					nut.lang.stored["english"][className] = printName
-					table.Merge(nut.lang.stored["korean"], self.attachmentKorean)
-				end
-			end
-
-			ITEM.functions.use = {
-			name = "Attach",
-			tip = "useTip",
-			icon = "icon16/wrench.png",
-			onRun = function(item)
-						local client = item.player
-						local char = client:getChar()
-						local inv = char:getInv()
-						local items = inv:getItems()
-
-						for k, v in pairs(items) do
-							if (v.isWeapon) then
-								local class = v.class
-								local SWEP = weapons.Get(class)
-
-
-								if (SWEP and (class:find("cw_") or class:find("ma85_"))) then
-									local atts = SWEP.Attachments
-
-									local mods = v:getData("mod", {})
-									
-									if (atts) then		
-										local canAttach
-										for atcat, data in pairs(atts) do
-											for k, name in pairs(data.atts) do
-												if (name == item.uniqueID) then
-													canAttach = atcat
-
-													break
-												end
-											end
-										end
-										
-										local slotFilled
-										if (atts[canAttach]) then
-											for _, att1 in pairs(mods) do
-												for _, att2 in pairs(atts[canAttach].atts) do
-													if (att1 == att2) then
-														slotFilled = true
-													end
-												end 
-											end
-										end
-
-										if (slotFilled) then
-											client:notifyLocalized("cantAttached")
-
-											return false
-										end
-
-										if (!canAttach) then
-											client:notifyLocalized("cantAttached")
-
-											return false
-										end
-
-										if (!table.HasValue(mods, item.uniqueID)) then
-											table.insert(mods, item.uniqueID)
-
-											v:setData("mod", mods)
-
-											local wepon = client:GetActiveWeapon()
-											if (IsValid(wepon) and wepon:GetClass() == v.class) then
-												wepon:attachSpecificAttachment(item.uniqueID)
-											end
-											return true
-										else
-											client:notifyLocalized("alreadyAttached")
-
-											return false
-										end
-									else
-										client:notifyLocalized("notCW")
-									end
-								end
-							end
-						end
-
-						client:notifyLocalized("noWeapon")
-						return false
-					end,
-			}
-
- 		end
 	end
 
 	-- Reconfigure Customizable Weaponry in here	
-	do
+	do	
+		-- There is no Customization Keys.
 		CustomizableWeaponry.customizationMenuKey = "" -- the key we need to press to toggle the customization menu
 		CustomizableWeaponry.canDropWeapon = false
 		CustomizableWeaponry.enableWeaponDrops = false
@@ -472,22 +457,29 @@ function PLUGIN:InitializedPlugins()
 
 				if (char) then
 					local inv = char:getInv()
+					local attList = {}
 
 					for k, v in pairs(inv:getItems()) do
-						if (v.class == class) then
+						if (v.isWeapon and v.class == class) then
 							local attachments = v:getData("mod")
 
 							if (attachments) then
-								for a, b in pairs(attachments) do
-									timer.Simple(0.2, function()
-										if (weapon.attachSpecificAttachment) then
-											weapon:attachSpecificAttachment(b)
-										end
-									end)
+								for k, v in pairs(attachments) do
+									table.insert(attList, v[2])
 								end
 							end
+
+							break
 						end
 					end
+
+					timer.Simple(0.2, function()
+						if (IsValid(weapon) and weapon:GetClass() == class and weapon.attachSpecificAttachment) then
+							for _, b in ipairs(attList) do
+								weapon:attachSpecificAttachment(b)
+							end
+						end
+					end)
 
 					weapon.attLoaded = true
 				end

@@ -166,16 +166,9 @@ OUTFIT_DATA = {
 		uid = "bmale",
 		facemap = "models/btcitizen/facemaps/erdim_facemap",
 		skins = {
-			"facemaps/erdim_facemap",
-			"facemaps/erdim_facemap2",
-			"facemaps/erdim_facemap3",
-			"facemaps/erdim_facemap4",
 			"facemaps/ffactory/erdim_cylmap",
-			"facemaps/freshman/erdim_cylmap",
-			"facemaps/freshman/erdim_facemap",
 			"facemaps/rusty/erdim_facemap",
 			"facemaps/rusty2/erdim_facemap",
-			"facemaps/zombie/erdim_cylmap",
 		},
 	},
 	["models/btcitizen/male_10.mdl"] = {
@@ -667,7 +660,7 @@ OUTFIT_REGISTERED = {
 			canDisplay = function()
 			end,
 			outfits = function(entity)
-				local mdl = LocalPlayer():GetModel()
+				local mdl = entity:GetModel()
 				local faces = {}
 				local woo = OUTFIT_DATA[mdl:lower()]
 				if (!woo) then return faces end
@@ -688,7 +681,7 @@ OUTFIT_REGISTERED = {
 				return faces
 			end,
 			func = function(entity, outfit, orig)
-				local mdl = LocalPlayer():GetModel()
+				local mdl = entity:GetModel()
 				local woo = OUTFIT_DATA[mdl:lower()]
 
 				if (outfit and woo.facemap) then
@@ -937,7 +930,7 @@ OUTFIT_REGISTERED = {
 			canDisplay = function()
 			end,
 			outfits = function(entity)
-				local mdl = LocalPlayer():GetModel()
+				local mdl = entity:GetModel()
 				local faces = {}
 				local woo = OUTFIT_DATA[mdl:lower()]
 				if (!woo) then return faces end
@@ -958,7 +951,7 @@ OUTFIT_REGISTERED = {
 				return faces
 			end,
 			func = function(entity, outfit, orig)
-				local mdl = LocalPlayer():GetModel()
+				local mdl = entity:GetModel()
 				local woo = OUTFIT_DATA[mdl:lower()]
 
 				if (outfit and woo.facemap) then
