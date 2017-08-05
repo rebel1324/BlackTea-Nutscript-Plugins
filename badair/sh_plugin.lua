@@ -49,6 +49,36 @@ do
 	table.Merge(nut.lang.stored[langkey], langTable)
 end
 
+langkey = "korean"
+do
+	local langTable = {
+		["Respirator"] = "방독면",
+		["Filter"] = "필터",
+		gmskFilter = "You exchanged the filter.",
+		badairAdded = "You added new Toxic Air Area",
+		badairCommand = "Run the command again at a different position to set a maximum point.",
+		badairRemoved = "Toxic Air Area is removed.",
+		badairBeArea = "You need to be in Toxic Air Area to remove.",
+		filterTip = "방독면은 필터가 작동해야만 효과가 발동됩니다.",
+		maskEquipped = "이미 방독면을 착용하고 있습니다!",
+		noFilter = "교체할 필터를 가지고 있지 않습니다.",
+		maskFull = "이 방독면의 필터는 이미 새거입니다.",
+		gasMaskDesc = "나쁜 환경으로부터 보호해주는 호흡기관을 보호해주는 방독면입니다.\n상태: %s (%s)</color>\n필터: %s (%s)</color>\n<color=192, 57, 43>필터가 작동하는 상태로 착용을 해야 효과가 발동됩니다.",
+		gasMaskDescEntity = "나쁜 환경으로부터 보호해주는 호흡기관을 보호해주는 방독면입니다.",
+		filterDesc = "방독면에 쓸 수 있는 필터입니다. 방독면은 필터가 있어야만 제대로 작동합니다.\n<color=39, 174, 96>방독면에 아이템을 끌어다 놓는 것으로도 필터를 교체할 수 있습니다.",
+		filterDescEntity = "방독면에 쓸 수 있는 필터입니다.",
+		txtCond0 = "<color=39, 174, 96>새것 같음",
+		txtCond1 = "<color=80, 174, 80>잘 관리됨",
+		txtCond2 = "<color=182, 174, 60>상처가 보임",
+		txtCond3 = "<color=222, 100, 50>거의 작동 안함",
+		txtCond4 = "<color=192, 57, 43>박살남",
+		txtFunc = "<color=39, 174, 96>기능 중",
+		txtFail = "<color=192, 57, 43>비어있음",
+	}
+
+	table.Merge(nut.lang.stored[langkey], langTable)
+end
+
 local PLAYER = FindMetaTable("Player")
 
 function PLAYER:getGasMask()
@@ -156,6 +186,31 @@ if (CLIENT) then
 		addCrack()
 	end)
 else
+	function PLUGIN:PlayerLoadedChar(client, character, lastChar)
+		if (character) then
+			local inv = character:getInv()
+			local items = inv:getItems()
+
+			if (items) then
+				local gasItem 
+				for k, v in pairs(items) do
+					if (v.isGasMask) then
+						gasItem = v
+						break
+					end	
+				end
+
+				if (gasItem) then
+					client.nutGasMaskItem = gasItem
+					netstream.Start(client, "nutMaskOn", gasItem:getID(), gasItem:getHealth()) 
+				else
+					client.nutGasMaskItem = nil
+					netstream.Start(client, "nutMaskOff")
+				end
+			end
+		end
+	end
+
 	function PLUGIN:PlayerDeath(client)
 		local item = client:getGasMask()
 
