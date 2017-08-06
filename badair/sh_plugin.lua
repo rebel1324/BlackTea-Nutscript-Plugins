@@ -195,8 +195,11 @@ else
 				local gasItem 
 				for k, v in pairs(items) do
 					if (v.isGasMask) then
-						gasItem = v
-						break
+						if (v:isEquipped()) then
+							gasItem = v
+							
+							break
+						end
 					end	
 				end
 
