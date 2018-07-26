@@ -16,6 +16,11 @@ COOKER_STOVE = 2
 
 nut.util.include("cl_vgui.lua")
 
+nut.config.add("hungerTime", 1, "The time of which is deducted from hunger when not eating.", nil, {
+	data = {min = 0, max = 600},
+	category = "schema"
+})
+
 local playerMeta = FindMetaTable("Player")
 local entityMeta = FindMetaTable("Entity")
 
