@@ -4,6 +4,8 @@ PLUGIN.author = "Black Tea"
 PLUGIN.desc = "How about getting new foods in NutScript?"
 PLUGIN.hungrySeconds = 1100 -- A player can stand up 300 seconds without any foods
 
+nut.config.add("hungerTime", 5, "Amount of time between each hunger update." );
+
 COOKLEVEL = {
 	[1] = {"cookNever", 2, color_white},
 	[2] = {"cookFailed", 1, Color(207, 0, 15)},
